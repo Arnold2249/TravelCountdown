@@ -80,7 +80,187 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4 text-white relative">
-    
+
+
+    <audio id="bg-audio" src="./ambient-77072.mp3" preload="auto" loop></audio>
+    <button id="mute-btn" class="fixed top-6 right-6 z-50 bg-white/80 text-blue-700 rounded-full shadow-lg p-3 transition hover:bg-blue-500 hover:text-white focus:outline-none" aria-label="Toggle background music">
+        <i class="fa-solid fa-volume-up" id="mute-icon"></i>
+    </button>
+
+    <script>
+        class AudioController {
+            constructor() {
+                this.audio = document.getElementById('bg-audio');
+                this.muteBtn = document.getElementById('mute-btn');
+                this.muteIcon = document.getElementById('mute-icon');
+                this.isMuted = false;
+                this.hasInteracted = false;
+                this.audioLoaded = false;
+                this.volume = 0.7;
+                this.fadeInterval = null;
+                this.interactionEvents = ['scroll', 'wheel', 'touchstart', 'mousedown', 'keydown', 'pointermove'];
+                this.interactionThreshold = 1000; // 1 second grace period after load
+                this.pageLoadedTime = Date.now();
+                this.lastInteractionTime = 0;
+                this.interactionCheckInterval = null;
+                
+                this.init();
+            }
+            
+            init() {
+                if (!this.audio.canPlayType) {
+                    this.disablePlayer();
+                    return;
+                }
+                
+                this.audio.volume = 0;
+                
+                this.muteBtn.addEventListener('click', () => this.toggleMute());
+                
+                this.audio.addEventListener('canplaythrough', () => {
+                    this.audioLoaded = true;
+                });
+                
+                this.audio.addEventListener('error', () => {
+                    console.error('Audio loading failed');
+                    this.disablePlayer();
+                });
+                
+                // Initial gentle fade-in
+                window.addEventListener('DOMContentLoaded', () => {
+                    setTimeout(() => this.playAudio(true), 400);
+                });
+                
+                // More reliable interaction detection
+                const handleInteraction = () => {
+                    this.lastInteractionTime = Date.now();
+                    
+                    if (!this.hasInteracted && !this.isMuted) {
+                        const timeSinceLoad = Date.now() - this.pageLoadedTime;
+                        if (timeSinceLoad < this.interactionThreshold) return;
+                        
+                        this.playAudio(true);
+                        this.hasInteracted = true;
+                        this.removeInteractionListeners();
+                        clearInterval(this.interactionCheckInterval);
+                    }
+                };
+                
+                // Add multiple interaction listeners
+                this.interactionEvents.forEach(event => {
+                    window.addEventListener(event, handleInteraction, { passive: true });
+                });
+                
+                // Special case for mouse/trackpad movement
+                document.addEventListener('pointermove', handleInteraction, { passive: true });
+                document.addEventListener('wheel', handleInteraction, { passive: true });
+                
+                // Fallback: periodically check for interactions
+                this.interactionCheckInterval = setInterval(() => {
+                    if (this.hasInteracted) {
+                        clearInterval(this.interactionCheckInterval);
+                        return;
+                    }
+                    
+                    // If we've detected any interaction in the last 100ms
+                    if (Date.now() - this.lastInteractionTime < 100) {
+                        handleInteraction();
+                    }
+                }, 50);
+                
+                // Handle page visibility changes
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        this.pauseAudio(false);
+                    } else if (!this.isMuted) {
+                        this.playAudio(true);
+                    }
+                });
+            }
+            
+            removeInteractionListeners() {
+                this.interactionEvents.forEach(event => {
+                    window.removeEventListener(event, handleInteraction);
+                });
+                document.removeEventListener('pointermove', handleInteraction);
+                document.removeEventListener('wheel', handleInteraction);
+            }
+            
+            playAudio(smooth = false) {
+                if (this.isMuted || !this.audioLoaded) return;
+                
+                clearInterval(this.fadeInterval);
+                
+                this.audio.play().then(() => {
+                    if (smooth) {
+                        let v = 0;
+                        this.fadeInterval = setInterval(() => {
+                            v += 0.05;
+                            this.audio.volume = Math.min(v, this.volume);
+                            if (v >= this.volume) {
+                                clearInterval(this.fadeInterval);
+                                this.fadeInterval = null;
+                            }
+                        }, 40);
+                    } else {
+                        this.audio.volume = this.volume;
+                    }
+                }).catch(error => {
+                    console.warn('Audio play failed:', error);
+                    this.muteBtn.classList.add('opacity-50');
+                    this.muteBtn.title = "Click to enable audio (browser restrictions)";
+                });
+            }
+            
+            pauseAudio(smooth = false) {
+                clearInterval(this.fadeInterval);
+                
+                if (smooth) {
+                    let v = this.audio.volume;
+                    this.fadeInterval = setInterval(() => {
+                        v -= 0.05;
+                        this.audio.volume = Math.max(v, 0);
+                        if (v <= 0) {
+                            clearInterval(this.fadeInterval);
+                            this.fadeInterval = null;
+                            this.audio.pause();
+                        }
+                    }, 40);
+                } else {
+                    this.audio.pause();
+                }
+            }
+            
+            toggleMute() {
+                this.isMuted = !this.isMuted;
+                if (this.isMuted) {
+                    this.pauseAudio(true);
+                    this.muteIcon.classList.replace('fa-volume-up', 'fa-volume-mute');
+                    this.muteBtn.setAttribute('aria-pressed', 'true');
+                } else {
+                    this.playAudio(true);
+                    this.muteIcon.classList.replace('fa-volume-mute', 'fa-volume-up');
+                    this.muteBtn.setAttribute('aria-pressed', 'false');
+                }
+                
+                try {
+                    localStorage.setItem('bgAudioMuted', this.isMuted);
+                } catch (e) {
+                    console.warn('Could not access localStorage:', e);
+                }
+            }
+            
+            disablePlayer() {
+                this.muteBtn.style.display = 'none';
+                this.audio.remove();
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const audioController = new AudioController();
+        });
+    </script>
+
     <div class="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700 opacity-70 z-[-2]"></div>
     
     <div class="max-w-4xl w-full mx-auto">
