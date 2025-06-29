@@ -3,571 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Travel Countdown</title>
+    <title>Website Launch Countdown</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            transition: all 0.5s ease;
-            overflow-x: hidden;
+        .glow-text {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6);
         }
-        
         .countdown-box {
-            background: linear-gradient(135deg, rgba(255,255,255,0.13) 60%, rgba(59,130,246,0.08) 100%);
-            backdrop-filter: blur(16px) saturate(180%);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.25), 0 2px 8px 0 rgba(59,130,246,0.10);
-            border: 1.5px solid rgba(255, 255, 255, 0.22);
-            transition: 
-            transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-            box-shadow 0.4s cubic-bezier(0.4,0,0.2,1),
-            background 0.4s cubic-bezier(0.4,0,0.2,1),
-            opacity 0.4s;
-            transform: scale(0.96) translateY(16px);
-            opacity: 0.88;
-            margin: 28px 0;
+            background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+                        inset 0 2px 4px rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
             overflow: hidden;
         }
-
-        .countdown-box.active {
-            transform: scale(1.035) translateY(0);
-            opacity: 1;
-            box-shadow: 0 24px 64px 0 rgba(31, 38, 135, 0.38), 0 4px 16px 0 rgba(59,130,246,0.16);
-            border: 2.5px solid rgba(255, 255, 255, 0.38);
-            background: linear-gradient(135deg, rgba(255,255,255,0.18) 60%, rgba(59,130,246,0.13) 100%);
-            z-index: 12;
-        }
-      
-        .countdown-number {
-            font-family: 'Orbitron', sans-serif;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-            animation: pulse 2s infinite alternate;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.8; }
-            100% { opacity: 1; }
-        }
-        
-        .progress-bar {
-            height: 10px;
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.2);
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            border-radius: 5px;
-            transition: width 0.5s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .confetti {
+        .countdown-box::before {
+            content: '';
             position: absolute;
-            width: 10px;
-            height: 10px;
-            background-color: #f00;
-            opacity: 0;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: rotate(30deg);
+            pointer-events: none;
+        }
+        .animate-pulse-slow {
+            animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4 text-white relative">
-
-
-    <!-- <audio id="bg-audio" src="./ambient-77072.mp3" preload="auto" loop></audio>
-    <button id="mute-btn" class="fixed top-6 right-6 z-50 bg-white/80 text-blue-700 rounded-full shadow-lg p-3 transition hover:bg-blue-500 hover:text-white focus:outline-none" aria-label="Toggle background music">
-        <i class="fa-solid fa-volume-up" id="mute-icon"></i>
-    </button>
-
+<body class="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white flex flex-col items-center justify-center p-4">
+    <!-- Check if we should redirect immediately -->
     <script>
-        class AudioController {
-            constructor() {
-                this.audio = document.getElementById('bg-audio');
-                this.muteBtn = document.getElementById('mute-btn');
-                this.muteIcon = document.getElementById('mute-icon');
-                this.isMuted = false;
-                this.hasInteracted = false;
-                this.audioLoaded = false;
-                this.volume = 0.7;
-                this.fadeInterval = null;
-                this.interactionEvents = ['scroll', 'wheel', 'touchstart', 'mousedown', 'keydown', 'pointermove'];
-                this.interactionThreshold = 1000; // 1 second grace period after load
-                this.pageLoadedTime = Date.now();
-                this.lastInteractionTime = 0;
-                this.interactionCheckInterval = null;
-                
-                this.init();
-            }
-            
-            init() {
-                if (!this.audio.canPlayType) {
-                    this.disablePlayer();
-                    return;
-                }
-                
-                this.audio.volume = 0;
-                
-                this.muteBtn.addEventListener('click', () => this.toggleMute());
-                
-                this.audio.addEventListener('canplaythrough', () => {
-                    this.audioLoaded = true;
-                });
-                
-                this.audio.addEventListener('error', () => {
-                    console.error('Audio loading failed');
-                    this.disablePlayer();
-                });
-                
-                // Initial gentle fade-in
-                window.addEventListener('DOMContentLoaded', () => {
-                    setTimeout(() => this.playAudio(true), 400);
-                });
-                
-                // More reliable interaction detection
-                const handleInteraction = () => {
-                    this.lastInteractionTime = Date.now();
-                    
-                    if (!this.hasInteracted && !this.isMuted) {
-                        const timeSinceLoad = Date.now() - this.pageLoadedTime;
-                        if (timeSinceLoad < this.interactionThreshold) return;
-                        
-                        this.playAudio(true);
-                        this.hasInteracted = true;
-                        this.removeInteractionListeners();
-                        clearInterval(this.interactionCheckInterval);
-                    }
-                };
-                
-                // Add multiple interaction listeners
-                this.interactionEvents.forEach(event => {
-                    window.addEventListener(event, handleInteraction, { passive: true });
-                });
-                
-                // Special case for mouse/trackpad movement
-                document.addEventListener('pointermove', handleInteraction, { passive: true });
-                document.addEventListener('wheel', handleInteraction, { passive: true });
-                
-                // Fallback: periodically check for interactions
-                this.interactionCheckInterval = setInterval(() => {
-                    if (this.hasInteracted) {
-                        clearInterval(this.interactionCheckInterval);
-                        return;
-                    }
-                    
-                    // If we've detected any interaction in the last 100ms
-                    if (Date.now() - this.lastInteractionTime < 100) {
-                        handleInteraction();
-                    }
-                }, 50);
-                
-                // Handle page visibility changes
-                document.addEventListener('visibilitychange', () => {
-                    if (document.hidden) {
-                        this.pauseAudio(false);
-                    } else if (!this.isMuted) {
-                        this.playAudio(true);
-                    }
-                });
-            }
-            
-            removeInteractionListeners() {
-                this.interactionEvents.forEach(event => {
-                    window.removeEventListener(event, handleInteraction);
-                });
-                document.removeEventListener('pointermove', handleInteraction);
-                document.removeEventListener('wheel', handleInteraction);
-            }
-            
-            playAudio(smooth = false) {
-                if (this.isMuted || !this.audioLoaded) return;
-                
-                clearInterval(this.fadeInterval);
-                
-                this.audio.play().then(() => {
-                    if (smooth) {
-                        let v = 0;
-                        this.fadeInterval = setInterval(() => {
-                            v += 0.05;
-                            this.audio.volume = Math.min(v, this.volume);
-                            if (v >= this.volume) {
-                                clearInterval(this.fadeInterval);
-                                this.fadeInterval = null;
-                            }
-                        }, 40);
-                    } else {
-                        this.audio.volume = this.volume;
-                    }
-                }).catch(error => {
-                    console.warn('Audio play failed:', error);
-                    this.muteBtn.classList.add('opacity-50');
-                    this.muteBtn.title = "Click to enable audio (browser restrictions)";
-                });
-            }
-            
-            pauseAudio(smooth = false) {
-                clearInterval(this.fadeInterval);
-                
-                if (smooth) {
-                    let v = this.audio.volume;
-                    this.fadeInterval = setInterval(() => {
-                        v -= 0.05;
-                        this.audio.volume = Math.max(v, 0);
-                        if (v <= 0) {
-                            clearInterval(this.fadeInterval);
-                            this.fadeInterval = null;
-                            this.audio.pause();
-                        }
-                    }, 40);
-                } else {
-                    this.audio.pause();
-                }
-            }
-            
-            toggleMute() {
-                this.isMuted = !this.isMuted;
-                if (this.isMuted) {
-                    this.pauseAudio(true);
-                    this.muteIcon.classList.replace('fa-volume-up', 'fa-volume-mute');
-                    this.muteBtn.setAttribute('aria-pressed', 'true');
-                } else {
-                    this.playAudio(true);
-                    this.muteIcon.classList.replace('fa-volume-mute', 'fa-volume-up');
-                    this.muteBtn.setAttribute('aria-pressed', 'false');
-                }
-                
-                try {
-                    localStorage.setItem('bgAudioMuted', this.isMuted);
-                } catch (e) {
-                    console.warn('Could not access localStorage:', e);
-                }
-            }
-            
-            disablePlayer() {
-                this.muteBtn.style.display = 'none';
-                this.audio.remove();
-            }
+        // Set your launch date (July 10, 2025)
+        const launchDate = new Date('2025-06-30');
+        const currentDate = new Date();
+        
+        // If current date is past launch date, redirect immediately
+        if (currentDate >= launchDate) {
+            window.location.href = "main.html";
         }
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            const audioController = new AudioController();
-        });
-    </script> -->
+    </script>
 
-    <div class="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700 opacity-70 z-[-2]"></div>
-    
-    <div class="max-w-4xl w-full mx-auto">
-        <div class="text-center mb-8">
-            <h1 class="text-4xl md:text-5xl font-bold mb-2 font-['Bebas_Neue'] tracking-wide">TRAVEL COUNTDOWN</h1>
-            <p class="text-xl md:text-2xl opacity-90">Journey begins in</p>
+    <div class="max-w-2xl w-full text-center space-y-8">
+        <div class="space-y-4">
+            <h1 class="text-4xl md:text-6xl font-bold glow-text animate-pulse-slow">Coming Soon</h1>
+            <p class="text-xl md:text-2xl opacity-90">Website launches in:</p>
         </div>
-        
-        <div class="countdown-box p-6 md:p-8 mb-8" data-start-date="2025-01-01" data-departure-date="2025-08-10">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-6">
-                <div class="mb-4 md:mb-0">
-                    <h1 class="text-xl font-semibold">Rebecca's Card</h1>
-                    <h2 class="text-2xl font-bold">Departure Date</h2>
-                    <p class="departure-date text-xl">August 10, 2025</p>
+
+        <div class="countdown-box p-6 md:p-8 w-full max-w-lg mx-auto">
+            <div class="grid grid-cols-4 gap-4 text-center">
+                <div class="space-y-2">
+                    <div id="days" class="text-4xl md:text-5xl font-bold">00</div>
+                    <div class="text-sm md:text-base opacity-80">Days</div>
                 </div>
-                <div class="text-right">
-                    <h2 class="text-2xl font-semibold">Destination</h2>
-                    <p class="destination text-xl">Toronto, Canada</p>
+                <div class="space-y-2">
+                    <div id="hours" class="text-4xl md:text-5xl font-bold">00</div>
+                    <div class="text-sm md:text-base opacity-80">Hours</div>
                 </div>
-            </div>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div class="text-center">
-                    <div class="countdown-number days text-4xl md:text-6xl font-bold mb-2">00</div>
-                    <div class="text-lg opacity-80">Days</div>
+                <div class="space-y-2">
+                    <div id="minutes" class="text-4xl md:text-5xl font-bold">00</div>
+                    <div class="text-sm md:text-base opacity-80">Minutes</div>
                 </div>
-                <div class="text-center">
-                    <div class="countdown-number hours text-4xl md:text-6xl font-bold mb-2">00</div>
-                    <div class="text-lg opacity-80">Hours</div>
-                </div>
-                <div class="text-center">
-                    <div class="countdown-number minutes text-4xl md:text-6xl font-bold mb-2">00</div>
-                    <div class="text-lg opacity-80">Minutes</div>
-                </div>
-                <div class="text-center">
-                    <div class="countdown-number seconds text-4xl md:text-6xl font-bold mb-2">00</div>
-                    <div class="text-lg opacity-80">Seconds</div>
-                </div>
-            </div>
-            
-            <div class="mb-4">
-                <div class="flex justify-between mb-2">
-                    <span>Time until departure</span>
-                    <span class="progress-text">0 days left</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill bg-white w-0"></div>
-                </div>
-            </div>
-            
-            <div class="mt-6">
-                <div class="flex justify-between items-center  rounded-lg p-1">
-                    <script>
-                        (function() {
-                            const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                            const today = new Date();
-                            const week = [];
-                            // Find the start of the week (Sunday)
-                            const startOfWeek = new Date(today);
-                            startOfWeek.setDate(today.getDate() - today.getDay());
-                            for (let i = 0; i < 7; i++) {
-                                const d = new Date(startOfWeek);
-                                d.setDate(startOfWeek.getDate() + i);
-                                week.push(d);
-                            }
-                            document.write(
-                                week.map(d =>
-                                    `<div class="flex flex-col items-center w-10">
-                                        <span class="text-xs md:text-sm">${daysOfWeek[d.getDay()]}</span>
-                                        <span class="text-lg md:text-xl font-bold rounded-full px-2 py-1 ${d.toDateString() === today.toDateString() ? 'bg-blue-500 text-white' : 'bg-transparent text-white'}">${d.getDate()}</span>
-                                    </div>`
-                                ).join('')
-                            );
-                        })();
-                    </script>
+                <div class="space-y-2">
+                    <div id="seconds" class="text-4xl md:text-5xl font-bold">00</div>
+                    <div class="text-sm md:text-base opacity-80">Seconds</div>
                 </div>
             </div>
         </div>
-        
-
-        <!-- 2 -->
-        <div class="countdown-box p-6 md:p-8 mb-8" data-start-date="2025-01-01" data-departure-date="2025-08-10">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-6">
-                <div class="mb-4 md:mb-0">
-                    <h1 class="text-xl font-semibold">Theodora's Card</h1>
-                    <h2 class="text-2xl font-bold">Departure Date</h2>
-                    <p class="departure-date text-xl">September 15, 2025</p>
-                </div>
-                <div class="text-right">
-                    <h2 class="text-2xl font-semibold">Destination</h2>
-                    <p class="destination text-xl">Toronto, Canada</p>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div class="text-center">
-                    <div class="countdown-number days text-4xl md:text-6xl font-bold mb-2">00</div>
-                    <div class="text-lg opacity-80">Days</div>
-                </div>
-                <div class="text-center">
-                    <div class="countdown-number hours text-4xl md:text-6xl font-bold mb-2">00</div>
-                    <div class="text-lg opacity-80">Hours</div>
-                </div>
-                <div class="text-center">
-                    <div class="countdown-number minutes text-4xl md:text-6xl font-bold mb-2">00</div>
-                    <div class="text-lg opacity-80">Minutes</div>
-                </div>
-                <div class="text-center">
-                    <div class="countdown-number seconds text-4xl md:text-6xl font-bold mb-2">00</div>
-                    <div class="text-lg opacity-80">Seconds</div>
-                </div>
-            </div>
-            
-            <div class="mb-4">
-                <div class="flex justify-between mb-2">
-                    <span>Time until departure</span>
-                    <span class="progress-text">0 days left</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill bg-white w-0"></div>
-                </div>
-            </div>
-
-            <div class="mt-6">
-                <div class="flex justify-between items-center  rounded-lg p-1">
-                    <script>
-                        (function() {
-                            const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                            const today = new Date();
-                            const week = [];
-                            // Find the start of the week (Sunday)
-                            const startOfWeek = new Date(today);
-                            startOfWeek.setDate(today.getDate() - today.getDay());
-                            for (let i = 0; i < 7; i++) {
-                                const d = new Date(startOfWeek);
-                                d.setDate(startOfWeek.getDate() + i);
-                                week.push(d);
-                            }
-                            document.write(
-                                week.map(d =>
-                                    `<div class="flex flex-col items-center w-10">
-                                        <span class="text-xs md:text-sm">${daysOfWeek[d.getDay()]}</span>
-                                        <span class="text-lg md:text-xl font-bold rounded-full px-2 py-1 ${d.toDateString() === today.toDateString() ? 'bg-blue-500 text-white' : 'bg-transparent text-white'}">${d.getDate()}</span>
-                                    </div>`
-                                ).join('')
-                            );
-                        })();
-                    </script>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3 -->
-        <div class="countdown-box p-6 md:p-8 mb-8" data-start-date="2025-01-01" data-departure-date="2025-08-17">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-6">
-                <div class="mb-4 md:mb-0">
-                    <h1 class="text-xl font-semibold">Arnold's Card</h1>
-                    <h2 class="text-2xl font-bold">Departure Date</h2>
-                    <p class="departure-date text-xl">October 20, 2025</p>
-                </div>
-                <div class="text-right">
-                    <h2 class="text-2xl font-semibold">Destination</h2>
-                    <p class="destination text-xl">Toronto, Canada</p>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div class="text-center">
-                    <div class="countdown-number days text-4xl md:text-6xl font-bold mb-2">00</div>
-                    <div class="text-lg opacity-80">Days</div>
-                </div>
-                <div class="text-center">
-                    <div class="countdown-number hours text-4xl md:text-6xl font-bold mb-2">00</div>
-                    <div class="text-lg opacity-80">Hours</div>
-                </div>
-                <div class="text-center">
-                    <div class="countdown-number minutes text-4xl md:text-6xl font-bold mb-2">00</div>
-                    <div class="text-lg opacity-80">Minutes</div>
-                </div>
-                <div class="text-center">
-                    <div class="countdown-number seconds text-4xl md:text-6xl font-bold mb-2">00</div>
-                    <div class="text-lg opacity-80">Seconds</div>
-                </div>
-            </div>
-            
-            <div class="mb-4">
-                <div class="flex justify-between mb-2">
-                    <span>Time until departure</span>
-                    <span class="progress-text">0 days left</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill bg-white w-0"></div>
-                </div>
-            </div>
-
-            
-            <div class="mt-6">
-                <div class="flex justify-between items-center   p-1">
-                    <script>
-                        (function() {
-                            const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                            const today = new Date();
-                            const week = [];
-                            // Find the start of the week (Sunday)
-                            const startOfWeek = new Date(today);
-                            startOfWeek.setDate(today.getDate() - today.getDay());
-                            for (let i = 0; i < 7; i++) {
-                                const d = new Date(startOfWeek);
-                                d.setDate(startOfWeek.getDate() + i);
-                                week.push(d);
-                            }
-                            document.write(
-                                week.map(d =>
-                                    `<div class="flex flex-col items-center w-10">
-                                        <span class="text-xs md:text-sm">${daysOfWeek[d.getDay()]}</span>
-                                        <span class="text-lg md:text-xl font-bold rounded-full px-2 py-1 ${d.toDateString() === today.toDateString() ? 'bg-blue-500 text-white' : 'bg-transparent text-white'}">${d.getDate()}</span>
-                                    </div>`
-                                ).join('')
-                            );
-                        })();
-                    </script>
-                </div>
-            </div>
-            
-        </div>
-
-        
     </div>
-        
-    <script>
-        // Confetti effect
-        function createConfetti() {
-            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-            
-            for (let i = 0; i < 100; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.left = `${Math.random() * 100}%`;
-                confetti.style.top = `${Math.random() * 100}%`;
-                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
-                
-                document.body.appendChild(confetti);
-                
-                // Animate
-                setTimeout(() => {
-                    confetti.style.opacity = '1';
-                    confetti.style.transform = `translate(${Math.random() * 200 - 100}px, ${Math.random() * 200 + 100}px) rotate(${Math.random() * 360}deg)`;
-                    confetti.style.transition = `all ${Math.random() * 3 + 2}s ease-out`;
-                    
-                    setTimeout(() => {
-                        confetti.style.opacity = '0';
-                    }, 2000);
-                }, i * 20);
-            }
-        }
-        
-        // Initialize countdowns
-        function updateCountdowns() {
-            const countdownBoxes = document.querySelectorAll('.countdown-box');
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            
-            countdownBoxes.forEach(box => {
-                const startDateStr = box.getAttribute('data-start-date');
-                const departureDateStr = box.getAttribute('data-departure-date');
-                const startDate = new Date(startDateStr);
-                const departureDate = new Date(departureDateStr);
-                
-                // Update departure date text
-                const departureDateElem = box.querySelector('.departure-date');
-                departureDateElem.textContent = departureDate.toLocaleDateString('en-US', options);
-                
-                const diff = departureDate - now;
-                const totalDays = Math.ceil((departureDate - startDate) / (1000 * 60 * 60 * 24));
-                
-                const daysElem = box.querySelector('.days');
-                const hoursElem = box.querySelector('.hours');
-                const minutesElem = box.querySelector('.minutes');
-                const secondsElem = box.querySelector('.seconds');
-                const progressTextElem = box.querySelector('.progress-text');
-                const progressFillElem = box.querySelector('.progress-fill');
 
-                // If now is before start date, show 0% progress
-                if (now < startDate) {
-                    daysElem.textContent = '00';
-                    hoursElem.textContent = '00';
-                    minutesElem.textContent = '00';
-                    secondsElem.textContent = '00';
-                    progressTextElem.textContent = `${totalDays} days left out of ${totalDays}`;
-                    progressFillElem.style.width = '0%';
-                    return;
-                }
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set launch date (July 10, 2025)
+            const launchDate = new Date('2025-06-30');
+            const daysEl = document.getElementById('days');
+            const hoursEl = document.getElementById('hours');
+            const minutesEl = document.getElementById('minutes');
+            const secondsEl = document.getElementById('seconds');
+            
+            // Update countdown every second
+            updateCountdown();
+            const countdownInterval = setInterval(updateCountdown, 1000);
+            
+            function updateCountdown() {
+                const now = new Date();
+                const diff = launchDate - now;
                 
                 if (diff <= 0) {
-                    daysElem.textContent = '00';
-                    hoursElem.textContent = '00';
-                    minutesElem.textContent = '00';
-                    secondsElem.textContent = '00';
-                    progressTextElem.textContent = 'Bon voyage!';
-                    progressFillElem.style.width = '100%';
-                    
-                    // Show confetti if not already shown
-                    if (!box.classList.contains('confetti-shown')) {
-                        createConfetti();
-                        box.classList.add('confetti-shown');
-                    }
+                    clearInterval(countdownInterval);
+                    // Redirect to main page when countdown finishes
+                    window.location.href = "main.html";
                     return;
                 }
                 
@@ -576,63 +114,11 @@
                 const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((diff % (1000 * 60)) / 1000);
                 
-                daysElem.textContent = days.toString().padStart(2, '0');
-                hoursElem.textContent = hours.toString().padStart(2, '0');
-                minutesElem.textContent = minutes.toString().padStart(2, '0');
-                secondsElem.textContent = seconds.toString().padStart(2, '0');
-                
-                let daysPassed = totalDays - days;
-                if (daysPassed < 0) daysPassed = 0;
-                if (daysPassed > totalDays) daysPassed = totalDays;
-                let progressPercent = (daysPassed / totalDays) * 100;
-                if (progressPercent > 100) progressPercent = 100;
-
-            
-                if (days < 14) {
-                    daysElem.style.color = '#ef4444';
-                    hoursElem.style.color = '#ef4444';
-                    minutesElem.style.color = '#ef4444';
-                    secondsElem.style.color = '#ef4444';
-                } else {
-                    daysElem.style.color = '';
-                    hoursElem.style.color = '';
-                    minutesElem.style.color = '';
-                    secondsElem.style.color = '';
-                }
-                if (progressPercent < 0) progressPercent = 0;
-                progressTextElem.textContent = `${days} days left out of ${totalDays}`;
-                progressFillElem.style.width = `${progressPercent}%`;
-            });
-        }
-        
-        // Check card visibility for animation
-        function checkCardVisibility() {
-            const cards = document.querySelectorAll('.countdown-box');
-            const windowHeight = window.innerHeight;
-            const triggerPoint = windowHeight * 0.2; // 20% from top
-            
-            cards.forEach(card => {
-                const cardTop = card.getBoundingClientRect().top;
-                const cardBottom = card.getBoundingClientRect().bottom;
-                
-                // Check if card is in view
-                if (cardTop < windowHeight - triggerPoint && cardBottom > triggerPoint) {
-                    card.classList.add('active');
-                } else {
-                    card.classList.remove('active');
-                }
-            });
-        }
-        
-        // Initialize everything
-        document.addEventListener('DOMContentLoaded', function() {
-            updateCountdowns();
-            setInterval(updateCountdowns, 1000);
-            
-            // Add scroll event listener for card animation
-            window.addEventListener('scroll', checkCardVisibility);
-            // Check on load
-            checkCardVisibility();
+                daysEl.textContent = days.toString().padStart(2, '0');
+                hoursEl.textContent = hours.toString().padStart(2, '0');
+                minutesEl.textContent = minutes.toString().padStart(2, '0');
+                secondsEl.textContent = seconds.toString().padStart(2, '0');
+            }
         });
     </script>
 </body>
