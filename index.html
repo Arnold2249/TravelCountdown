@@ -6,6 +6,14 @@
     <title>Travel Launch Countdown</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+   <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Launch Countdown</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .glow-text {
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6);
@@ -48,7 +56,7 @@
     <!-- Check if we should redirect immediately -->
     <script>
         // Set your launch date (July 10, 2025)
-        const launchDate = new Date('2025-06-30');
+        const launchDate = new Date('2025-07-10');
         const currentDate = new Date();
         
         // If current date is past launch date, redirect immediately
@@ -88,7 +96,124 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Set launch date (July 10, 2025)
-            const launchDate = new Date('2025-06-30');
+            const launchDate = new Date('2025-07-10');
+            const daysEl = document.getElementById('days');
+            const hoursEl = document.getElementById('hours');
+            const minutesEl = document.getElementById('minutes');
+            const secondsEl = document.getElementById('seconds');
+            
+            // Update countdown every second
+            updateCountdown();
+            const countdownInterval = setInterval(updateCountdown, 1000);
+            
+            function updateCountdown() {
+                const now = new Date();
+                const diff = launchDate - now;
+                
+                if (diff <= 0) {
+                    clearInterval(countdownInterval);
+                    // Redirect to main page when countdown finishes
+                    window.location.href = "main.html";
+                    return;
+                }
+                
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                daysEl.textContent = days.toString().padStart(2, '0');
+                hoursEl.textContent = hours.toString().padStart(2, '0');
+                minutesEl.textContent = minutes.toString().padStart(2, '0');
+                secondsEl.textContent = seconds.toString().padStart(2, '0');
+            }
+        });
+    </script>
+</body>
+</html>
+ <style>
+        .glow-text {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6);
+        }
+        .countdown-box {
+            background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+                        inset 0 2px 4px rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        .countdown-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: rotate(30deg);
+            pointer-events: none;
+        }
+        .animate-pulse-slow {
+            animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white flex flex-col items-center justify-center p-4">
+    <!-- Check if we should redirect immediately -->
+    <script>
+        // Set your launch date (July 10, 2025)
+        const launchDate = new Date('2025-07-10');
+        const currentDate = new Date();
+        
+        // If current date is past launch date, redirect immediately
+        if (currentDate >= launchDate) {
+            window.location.href = "main.html";
+        }
+    </script>
+
+    <div class="max-w-2xl w-full text-center space-y-8">
+        <div class="space-y-4">
+            <h1 class="text-4xl md:text-6xl font-bold glow-text animate-pulse-slow">Coming Soon</h1>
+            <p class="text-xl md:text-2xl opacity-90">Website launches in:</p>
+        </div>
+
+        <div class="countdown-box p-6 md:p-8 w-full max-w-lg mx-auto">
+            <div class="grid grid-cols-4 gap-4 text-center">
+                <div class="space-y-2">
+                    <div id="days" class="text-4xl md:text-5xl font-bold">00</div>
+                    <div class="text-sm md:text-base opacity-80">Days</div>
+                </div>
+                <div class="space-y-2">
+                    <div id="hours" class="text-4xl md:text-5xl font-bold">00</div>
+                    <div class="text-sm md:text-base opacity-80">Hours</div>
+                </div>
+                <div class="space-y-2">
+                    <div id="minutes" class="text-4xl md:text-5xl font-bold">00</div>
+                    <div class="text-sm md:text-base opacity-80">Minutes</div>
+                </div>
+                <div class="space-y-2">
+                    <div id="seconds" class="text-4xl md:text-5xl font-bold">00</div>
+                    <div class="text-sm md:text-base opacity-80">Seconds</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set launch date (July 10, 2025)
+            const launchDate = new Date('2025-07-10');
             const daysEl = document.getElementById('days');
             const hoursEl = document.getElementById('hours');
             const minutesEl = document.getElementById('minutes');
